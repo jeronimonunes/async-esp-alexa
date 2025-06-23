@@ -1,0 +1,24 @@
+{
+    "name": "AsyncEspAlexa",
+    "version": "1.0.0",
+    "description": "Library to control an ESP32 module with the Alexa voice assistant",
+    "keywords": "alexa, esp32, control, dimming, echo, color, async",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jeronimonunes/async-esp-alexa.git"
+    },
+    "authors": [
+        {
+            "name": "Jeronimo Nunes Rocha",
+            "maintainer": true
+        }
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "bblanchon/ArduinoJson": "^7.4.2",
+        "ESP32Async/AsyncTCP": "^3.4.4",
+        "ESP32Async/ESPAsyncWebServer": "^3.7.8"
+    },
+    "frameworks": "Arduino",
+    "platforms": "espressif32"
+}
