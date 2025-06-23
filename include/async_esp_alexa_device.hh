@@ -312,7 +312,7 @@ public:
         state["ct"] = this->colorTemperature;
     }
 
-    [[nodiscard]] uint8_t getColorTemperature() const
+    [[nodiscard]] uint16_t getColorTemperature() const
     {
         return colorTemperature;
     }
