@@ -42,10 +42,6 @@ private:
             beforeStateUpdateCallback(this);
     }
 
-    virtual void setBeforeStateUpdateCallback(const std::function<void(AsyncEspAlexaDevice* device)>& callback)
-    {
-        this->beforeStateUpdateCallback = callback;
-    }
 
     void setId(const uint8_t id)
     {
@@ -102,6 +98,11 @@ public:
     }
 
     virtual ~AsyncEspAlexaDevice() = default;
+
+    void setBeforeStateUpdateCallback(const std::function<void(AsyncEspAlexaDevice* device)>& callback)
+    {
+        this->beforeStateUpdateCallback = callback;
+    }
 
     virtual const char* getType() = 0;
     virtual const char* getModelId() = 0;
