@@ -77,6 +77,16 @@ void loop() {
 
 Upload the sketch and ask Alexa to discover devices.
 
+### Additional Examples
+
+Other sketches in the `examples` folder demonstrate different device types:
+
+* `onoff-light` – uses **AsyncEspAlexaOnOffDevice**
+* `dimmable-light` – uses **AsyncEspAlexaDimmableDevice**
+* `white-spectrum-light` – uses **AsyncEspAlexaWhiteSpectrumDevice**
+* `extended-color-light` – uses **AsyncEspAlexaExtendedColorDevice**
+* `before-state-update` – shows `beforeStateUpdateCallback` to sync hardware state
+
 ## Modules
 
 ### 1. `AsyncEspAlexaColorUtils`
