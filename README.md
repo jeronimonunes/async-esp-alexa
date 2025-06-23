@@ -1,98 +1,92 @@
-# AsyncEspAlexa - Documentation
+# AsyncEspAlexa
 
-## Overview
+Control ESP32 lights with Amazon Alexa using asynchronous HTTP. This header-only library implements the Hue-style API and includes utilities for color conversion.
 
-`AsyncEspAlexa` is a C++ library designed to enable ESP32-based devices to interact with Amazon Alexa using the Hue-compatible API. It leverages asynchronous networking (via `ESPAsyncWebServer`) for performance and modular design.
+## Features
 
-This library is based on the [EspAlexa](https://github.com/Aircoookie/Espalexa) project, but has been
-refactored to only support `ESP32` and to use the `ESPAsyncWebServer` library for asynchronous HTTP handling.
----
+- Hue-compatible API (on/off, brightness, color temperature and HSV color)
+- Asynchronous networking using ESPAsyncWebServer
+- Built-in color conversion helpers
+- Simple device classes for common light types
+- SSDP discovery for Alexa
 
-## Modules
+## Requirements
 
-### 1. `AsyncEspAlexaColorUtils`
+- ESP32 board with WiFi
+- Arduino framework (PlatformIO or Arduino IDE)
+- Dependencies:
+  - ESPAsyncWebServer
+  - AsyncTCP
+  - ArduinoJson
 
-Utility class for converting between color models:
+## Installation
 
-* Supported conversions:
+Use **PlatformIO**:
 
-  * HSV ↔ RGB
-  * RGB ↔ XY (CIE 1931)
-  * RGB ↔ CT (Color Temperature in Mireds)
-* Includes Alexa-specific ranges:
+```ini
+lib_deps =
+  https://github.com/jeronimonunes/async-esp-alexa.git
+```
 
-  * Brightness: 1–254
-  * Saturation: 0–254
-  * Hue: 0–65535
-* Function Highlights:
+Or clone this repository into your Arduino `libraries` folder.
 
-  * `hsvToRgb`, `rgbToHsv`, `xyToHsv`
-  * `ctToRgb`, `kelvinToRgb`
-  * `isCtLikeColor(r, g, b)`: checks if a color is near grayscale
-  * `rgbToCtBrightness(r, g, b)`: approximates CT and brightness from RGB
+## Quick Start
 
-### 2. `AsyncEspAlexaDevice`
+The `examples/rgb-light` sketch demonstrates how to expose a color light:
 
-Base and derived classes modeling smart lighting devices:
+```cpp
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
+#include "async_esp_alexa_manager.hh"
+#include "async_esp_alexa_color_utils.hh"
 
-* Core class: `AsyncEspAlexaDevice`
+AsyncEspAlexaManager alexa;
+AsyncWebServer server(80);
 
-  * Properties: `id`, `name`, `on`
-  * Methods: `getUniqueId()`, `encodeLightKey()`, `decodeLightKey()`
-  * Callbacks: `beforeStateUpdate`, `afterStateUpdate`
+void onColorChanged(bool on, uint8_t bri, uint16_t hue, uint8_t sat) {
+  auto [r,g,b] = AsyncEspAlexaColorUtils::hsvToRgb(hue, sat, bri);
+  // Add hardware control using r,g,b
+}
 
-* Derived device types:
+void setup() {
+  WiFi.begin("ssid", "password");
+  while (WiFi.status() != WL_CONNECTED) delay(500);
 
-  * `AsyncEspAlexaOnOffDevice`
-  * `AsyncEspAlexaDimmableDevice`
-  * `AsyncEspAlexaWhiteSpectrumDevice`
-  * `AsyncEspAlexaColorDevice`
-  * `AsyncEspAlexaExtendedColorDevice` (supports both CT and HSV)
+  auto *lamp = new AsyncEspAlexaColorDevice("Lamp", true, 128, 30000, 200);
+  lamp->setColorCallback(onColorChanged);
 
-Each device class implements:
+  alexa.reserve(1);
+  alexa.addDevice(lamp);
+  alexa.begin();
 
-* `getType()`, `getModelId()`, `getProductName()`
-* `handleStateUpdate(JsonObject)` to parse Alexa requests
-* `toJson(JsonObject)` to describe current state
+  server.addHandler(alexa.createAlexaAsyncWebHandler());
+  server.begin();
+}
 
-### 3. `AsyncEspAlexaManager`
+void loop() {
+  alexa.loop();
+}
+```
 
-Main controller responsible for:
+Upload the sketch and ask Alexa to discover devices.
 
-* Storing and managing device list
-* Handling SSDP (Alexa discovery via multicast UDP)
-* Providing a factory method for the web handler:
+## Library Components
 
-  ```cpp
-  AsyncWebHandler* createAlexaAsyncWebHandler();
-  ```
-* Methods:
+### Color Utils
+- HSV ↔ RGB, XY and color temperature conversions
+- Alexa ranges: brightness 1–254, hue 0–65535
 
-  * `begin()`, `loop()`
-  * `addDevice(device)`
-  * `reserve(n)` // reserves space for n devices, to avoid reallocations
-  * `setDiscoverable(bool)`
+### Device Classes
+- On/off, dimmable, white spectrum, color, and extended color lights
+- JSON parsing and serialization helpers
 
-### 4. `AsyncEspAlexaWebHandler`
-
-Handles Alexa's HTTP requests:
-
-* Routes supported:
-
-  * `GET /description.xml`: returns bridge metadata
-  * `GET /api/lights`: lists all devices
-  * `GET /api/lights/{id}`: details of a device
-  * `PUT /api/lights/{id}/state`: updates state
-* Automatically converts request body to JSON and invokes appropriate callbacks
-* Handles Hue-style onboarding with `devicetype`
-
----
+### Manager & Web Handler
+- Handles SSDP discovery
+- Provides the HTTP endpoints required by Alexa
 
 ## Configuration
 
-### `library.json`
-
-Metadata and dependencies for PlatformIO:
+The `library.json` file lists dependencies and metadata:
 
 ```json
 {
@@ -107,8 +101,6 @@ Metadata and dependencies for PlatformIO:
   }
 }
 ```
-
----
 
 ## License
 
