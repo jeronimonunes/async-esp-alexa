@@ -83,9 +83,9 @@ public:
         b = b <= 0.0031308f ? 12.92f * b : 1.055f * pow(b, 1.0f / 2.4f) - 0.055f;
 
         return rgbToHsv(
-            static_cast<uint8_t>(std::clamp(r, 0.0f, 1.0f) * 255),
-            static_cast<uint8_t>(std::clamp(g, 0.0f, 1.0f) * 255),
-            static_cast<uint8_t>(std::clamp(b, 0.0f, 1.0f) * 255)
+            static_cast<uint8_t>(std::clamp(r, 0.0f, 1.0f) * RGB_MAX_VAL),
+            static_cast<uint8_t>(std::clamp(g, 0.0f, 1.0f) * RGB_MAX_VAL),
+            static_cast<uint8_t>(std::clamp(b, 0.0f, 1.0f) * RGB_MAX_VAL)
         );
     }
 
@@ -93,8 +93,8 @@ public:
         const uint16_t hue, const uint8_t saturation)
     {
         std::array<uint8_t, 3> rgb = {};
-        const float h = static_cast<float>(hue) / HUE_MAX_VAL;
-        const float s = static_cast<float>(saturation) / ALEXA_MAX_SAT_VAL;
+        const float h = static_cast<float>(hue) / (HUE_MAX_VAL - HUE_MIN_VAL);
+        const float s = static_cast<float>(saturation) / (ALEXA_MAX_SAT_VAL - ALEXA_MIN_SAT_VAL);
         const int i = static_cast<int>(h * 6.0f);
         const float f = h * 6.0f - static_cast<float>(i);
         const float p = RGB_MAX_VAL * (1 - s);
@@ -124,7 +124,7 @@ public:
         const uint16_t hue, const uint8_t saturation, const uint8_t value)
     {
         const auto [r, g, b] = hsToRgb(hue, saturation);
-        const float factor = static_cast<float>(value) / ALEXA_MAX_BRI_VAL;
+        const float factor = static_cast<float>(value) / (ALEXA_MAX_BRI_VAL - ALEXA_MIN_BRI_VAL);
         return {
             static_cast<uint8_t>(std::clamp(static_cast<float>(r) * factor,
                                             static_cast<float>(RGB_MIN_VAL),
@@ -206,9 +206,9 @@ public:
     [[nodiscard]] static std::tuple<uint16_t, uint8_t, uint8_t> rgbToHsv(
         const uint8_t r, const uint8_t g, const uint8_t b)
     {
-        float fr = static_cast<float>(r) / 255.0f;
-        float fg = static_cast<float>(g) / 255.0f;
-        float fb = static_cast<float>(b) / 255.0f;
+        float fr = static_cast<float>(r) / static_cast<float>(RGB_MAX_VAL - RGB_MIN_VAL);
+        float fg = static_cast<float>(g) / static_cast<float>(RGB_MAX_VAL - RGB_MIN_VAL);
+        float fb = static_cast<float>(b) / static_cast<float>(RGB_MAX_VAL - RGB_MIN_VAL);
 
         const float max = std::max({fr, fg, fb});
         const float min = std::min({fr, fg, fb});
@@ -239,9 +239,9 @@ public:
     [[nodiscard]] static std::tuple<uint16_t, uint8_t, uint8_t> rgbwToHsv(
         const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t w)
     {
-        const uint8_t r_adj = static_cast<uint8_t>(std::min(255, r + w));
-        const uint8_t g_adj = static_cast<uint8_t>(std::min(255, g + w));
-        const uint8_t b_adj = static_cast<uint8_t>(std::min(255, b + w));
+        const uint8_t r_adj = static_cast<uint8_t>(std::min<int>(RGB_MAX_VAL, r + w));
+        const uint8_t g_adj = static_cast<uint8_t>(std::min<int>(RGB_MAX_VAL, g + w));
+        const uint8_t b_adj = static_cast<uint8_t>(std::min<int>(RGB_MAX_VAL, b + w));
 
         return rgbToHsv(r_adj, g_adj, b_adj);
     }
