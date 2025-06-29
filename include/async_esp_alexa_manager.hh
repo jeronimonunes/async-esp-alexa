@@ -84,6 +84,13 @@ public:
         devices.emplace_back(device);
     }
 
+    void deleteAllDevices()
+    {
+        for (const auto& device : devices)
+            delete device;
+        devices.clear();
+    }
+
     void setDiscoverable(const bool d)
     {
         discoverable = d;

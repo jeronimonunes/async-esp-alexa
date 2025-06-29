@@ -1,6 +1,6 @@
 {
     "name": "AsyncEspAlexa",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Library to control an ESP32 module with the Alexa voice assistant",
     "keywords": "alexa, esp32, control, dimming, echo, color, async",
     "repository": {
